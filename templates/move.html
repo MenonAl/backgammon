@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat({{ size }}, 50px);  /* Number of columns */
+            grid-template-rows: repeat({{ size }}, 50px);  /* Number of rows */
+            gap: 5px;  /* Spacing between cells */
+        }
+
+        .grid-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;  /* Center content within cell */
+            border: 1px solid black;
+            background-color: lightgray;  /* Visual enhancement */
+            cursor: pointer;  /* Change cursor to pointer on hover */
+        }
+        .grid-cell.player0 {
+            background-color: darkred;
+        }
+        .grid-cell.player1 {
+            background-color: royalblue;
+        }
+    </style>
+
+</head>
+<body>
+
+    <div style = "background-color: grey">
+        {{message1}}
+        {{message2}}
+        {{message3}}
+        {{message4}}
+    </div>
+
+    <form action = "/game/move" method = "post">
+        <label for = "tasks">Entry cell number :</label>
+        <input type = "text" id = "tasks" name = "tasks">
+        <button type = "submit"> Send cell number </button>
+    </form>
+
+    <form action = "/game/move/dice" method = "post">
+        <label for = "dices">Entry number of dice:</label>
+        <input type = "text" id = "dices" name = "dice">
+        <button type = "submit"> Send number of dice</button>
+    </form>
+
+    <form action = "/game/move/roll" method = "post">
+        <button type = "submit"> Roll the dice🎲 </button>
+    </form>
+
+    <form action = "/game/move/transition_move" method = "post">
+        <button type = "submit"> Transition move </button>
+    </form>
+
+    <div class="game-grid" id="game-grid">
+        {% for row_idx in range(size) %}
+            {% for col_idx in range(checkers_quantity) %}
+                <div
+                        class="grid-cell"
+                        data-row="{{ row_idx }}" data-column="{{ col_idx }}"
+                >
+                </div>
+            {% endfor %}
+            <div>
+
+            </div>
+            <dr></dr>
+        {% endfor %}
+    </div>
+    <script>
+        function refreshField() {
+            fetch('/game/move/try')
+                .then(response => response.json())
+                .then(field => {
+                    for (let row = 0; row < {{ size }}; row++) {
+                        for (let col = 0; col < {{ checkers_quantity }}; col++) {
+                            const cellDiv = document.querySelector(
+                                `.grid-cell[data-row="${row}"][data-column="${col}"]`
+                            );
+                            cellDiv.className = 'grid-cell';
+                            if (field[row][col] !== -1) {
+                                cellDiv.classList.add(`player${field[row][col]}`);
+                            }
+                        }
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        setInterval(refreshField, 1000)
+    </script>
+</body>
+</html>
